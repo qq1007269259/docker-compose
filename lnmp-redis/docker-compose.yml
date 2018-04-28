@@ -1,0 +1,56 @@
+version: '2'
+
+services:
+  nginx:
+    image: registry.cn-hangzhou.aliyuncs.com/xwjs/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /yourpath/etc/nginx/conf/nginx.conf:/usr/local/nginx/conf/nginx.conf
+      - /yourpath/etc/nginx/conf/vhost:/usr/local/nginx/conf/vhost
+      - /yourpath/etc/nginx/logs/access.log:/usr/local/nginx/logs/access.log
+      - /yourpath/etc/nginx/logs/error.log:/usr/local/nginx/logs/error.log
+      - /your/web/path:/var/www/html
+    links:
+      - php:php
+    depends_on:
+      - php
+    container_name: nginx
+  php:
+    image: registry.cn-hangzhou.aliyuncs.com/xwjs/php71
+    ports:
+      - "9000:9000"
+    expose:
+      - "9000"
+    volumes:
+      - /yourpath/etc/php71/php.ini:/usr/local/php/lib/php.ini
+      - /yourpath/etc/php71/www.conf:/usr/local/php/etc/php-fpm.d/www.conf
+      - /your/web/path:/var/www/html
+    links:
+      - mysql:mysql
+      - redis:redis
+    depends_on:
+      - mysql
+    container_name: php
+
+  redis:
+    image: registry.cn-hangzhou.aliyuncs.com/xwjs/redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - /yourpath/etc/redis:/usr/local/redis/etc
+    container_name: redis
+
+  mysql:
+    image: registry.cn-hangzhou.aliyuncs.com/xwjs/mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - /yourpath/etc/mysql/etc:/etc/mysql
+      - /yourpath/etc/mysql/data:/var/lib/mysql
+      - /yourpath/etc/mysql/logs/error.log:/var/log/mysql/error.log
+    environment:
+      MYSQL_ROOT_PASSWORD: "1"
+    container_name: mysql
+
