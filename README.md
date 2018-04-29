@@ -68,39 +68,53 @@ git clone git@github.com:xuweijie4030/docker-compose.git
 version: '2'
 
 services:
+  # 这里的名字可以自定义，服务启动后以这里的名字来命名容器的名字
   nginx:
+    # 这里是我们要引用的容器镜像，本地如果没有该镜像会自动从线上库拉取
     image: xuweijie/nginx
+    # 这里是我们要和宿主机进行映射的端口
     ports:
       - "80:80"
       - "443:443"
+    # 这里用来配置我们需要挂载的目录或文件，主要有配置文件、日志文件和代码
     volumes:
-      - /www/lnmp-etc/nginx/conf/nginx.conf:/usr/local/nginx/conf/nginx.conf   :前面为本地nginx配置文件路径，可自行修改为本机配置文件路径，以下所有volumes选项都是如此，所有原配置文件都在lnmp-etc中
-      - /www/lnmp-etc/nginx/conf/vhost:/usr/local/nginx/conf/vhost
-      - /www/lnmp-etc/nginx/logs/access.log:/usr/local/nginx/logs/access.log
-      - /www/lnmp-etc/nginx/logs/error.log:/usr/local/nginx/logs/error.log
-      - /www/html:/var/www/html
+      # ：前面是宿主机文件或目录的地址，：后面是容器中对应文件或目录所在地址，只需修改前面宿主机文件或目录地址即可
+      - /yourpath/etc/nginx/conf/nginx.conf:/usr/local/nginx/conf/nginx.conf
+      - /yourpath/etc/nginx/conf/vhost:/usr/local/nginx/conf/vhost
+      - /yourpath/etc/nginx/logs/access.log:/usr/local/nginx/logs/access.log
+      - /yourpath/etc/nginx/logs/error.log:/usr/local/nginx/logs/error.log
+      - /your/web/path:/var/www/html
+    # 这里是该容器需要链接的其他容器
     links:
       - php:php
+    # 指定启动后的容器的名字
+    container_name: nginx
   php:
     image: xuweijie/php71
     expose:
       - "9000"
     volumes:
-      - /www/lnmp-etc/php71/php.ini:/usr/local/php/lib/php.ini
-      - /www/html:/var/www/html
+      - /yourpath/etc/php71/php.ini:/usr/local/php/lib/php.ini
+      - /yourpath/etc/php71/php-fpm.d/www.conf:/usr/local/php/etc/php-fpm.d/www.conf
+      - /your/web/path:/var/www/html
     links:
       - mysql:mysql
+    container_name: php
 
   mysql:
     image: mysql:5.7
     ports:
       - "3306:3306"
+    # 对于mysql而言除了需要挂载配置文件和日志文件外还需要将数据库文件进行挂载
     volumes:
-      - /www/lnmp-etc/mysql/etc:/etc/mysql
-      - /www/lnmp-etc/mysql/data:/var/lib/mysql   该项相对比较特殊，为mysql原有数据库文件
-      - /www/lnmp-etc/mysql/logs/error.log:/var/log/mysql/error.log
+      - /yourpath/etc/mysql/etc:/etc/mysql
+      - /yourpath/etc/mysql/data:/var/lib/mysql
+      - /yourpath/etc/mysql/logs/error.log:/var/log/mysql/error.log
+    # 这里用来配置该容器的环境变量，这里主要用来设置mysql的root密码，可自行修改
     environment:
-      MYSQL_ROOT_PASSWORD: "1"   这里用来设置mysql登录密码
+      MYSQL_ROOT_PASSWORD: "1"
+    container_name: mysql
+
 ```
 
 在当前目录执行
