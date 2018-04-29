@@ -60,7 +60,7 @@
   
 ### 使用方法
 ```
-git clone git@github.com:marnong/docker-lnmp.git
+git clone git@github.com:xuweijie4030/docker-compose.git
 ```
 
 ##### 配置docker-compose.yml
