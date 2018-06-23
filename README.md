@@ -9,32 +9,25 @@ git clone git@github.com:xuweijie4030/docker-compose.git
 version: '2'
 
 services:
-  # 这里的名字可以自定义，服务启动后以这里的名字来命名容器的名字
+
   nginx:
-    # 这里是我们要引用的容器镜像，本地如果没有该镜像会自动从线上库拉取
     image: registry.cn-hangzhou.aliyuncs.com/xwjs/nginx
-    # 这里是我们要和宿主机进行映射的端口
     ports:
       - "80:80"
       - "443:443"
-    # 这里用来配置我们需要挂载的目录或文件，主要有配置文件、日志文件和代码
     volumes:
-      # ：前面是宿主机文件或目录的地址，：后面是容器中对应文件或目录所在地址，只需修改前面宿主机文件或目录地址即可
       - $PWD/nginx/nginx.conf:/usr/local/nginx/conf/nginx.conf
       - $PWD/nginx/vhost:/usr/local/nginx/conf/vhost
       - $PWD/nginx/logs/:/usr/local/nginx/logs/
-    # 引用代码容器中的代码
     volumes_from:
       - code
-    # 这里是该容器需要链接的其他容器
     links:
       - php:php
-    # 依赖容器
     depends_on:
       - code
       - php
-    # 指定启动后的容器的名字
     container_name: nginx
+    
   php:
     image: registry.cn-hangzhou.aliyuncs.com/xwjs/php71
     expose:
@@ -64,13 +57,18 @@ services:
     volumes:
       - $PWD/mysql/data:/var/lib/mysql/
     container_name: mysql
- 
-  # 代码容器，将本地代码挂载至该容器中即可
+    
   code:
     image: registry.cn-hangzhou.aliyuncs.com/xwjs/code
     volumes:
       - /your_code_path:/usr/local/nginx/html
     container_name: code
+    
+##########################################################################################################################################
+
+                       目前经测试过的系统中，Mac和Linux系统使用时只需将代码挂载至code容器中即可进行 第三步
+
+##########################################################################################################################################
 
 ```
 ##### 第三步 在当前目录执行
