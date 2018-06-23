@@ -1,42 +1,65 @@
 version: '2'
 
 services:
+
   nginx:
     image: registry.cn-hangzhou.aliyuncs.com/xwjs/nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - /yourpath/etc/nginx/conf/nginx.conf:/usr/local/nginx/conf/nginx.conf
-      - /yourpath/etc/nginx/conf/vhost:/usr/local/nginx/conf/vhost
-      - /yourpath/etc/nginx/logs/access.log:/usr/local/nginx/logs/access.log
-      - /yourpath/etc/nginx/logs/error.log:/usr/local/nginx/logs/error.log
-      - /your/web/path:/var/www/html
+      - $PWD/nginx/nginx.conf:/usr/local/nginx/conf/nginx.conf
+      - $PWD/nginx/vhost:/usr/local/nginx/conf/vhost
+      - $PWD/nginx/logs/:/usr/local/nginx/logs/
+    volumes_from:
+      - code
     links:
       - php:php
+    depends_on:
+      - code
+      - php
     container_name: nginx
 
   php:
     image: registry.cn-hangzhou.aliyuncs.com/xwjs/php71
-    expose:
-      - "9000"
     ports:
       - "9000:9000"
     volumes:
-      - /yourpath/etc/php71/php.ini:/usr/local/php/lib/php.ini
-      - /yourpath/etc/php71/php-fpm.d/www.conf:/usr/local/php/etc/php-fpm.d/www.conf
-      - /your/web/path:/var/www/html
+      - $PWD/php/php.ini:/usr/local/php/lib/php.ini
+      - $PWD/php/www.conf:/usr/local/php/etc/php-fpm.d/www.conf
+    volumes_from:
+      - code
     links:
       - mysql:mysql
+      - redis:redis
+    depends_on:
+      - code
+      - mysql
+      - redis
     container_name: php
+
+  redis:
+    image: registry.cn-hangzhou.aliyuncs.com/xwjs/redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - $PWD/redis/redis.conf:/usr/local/redis/redis.conf
+    container_name: redis
 
   mysql:
     image: registry.cn-hangzhou.aliyuncs.com/xwjs/mysql
     ports:
       - "3306:3306"
     volumes:
-      - /yourpath/etc/mysql/data:/var/lib/mysql
-      - /yourpath/etc/mysql/logs/error.log:/var/log/mysql/error.log
-    environment:
-      MYSQL_ROOT_PASSWORD: "1"
+      - $PWD/mysql/data:/var/lib/mysql/
     container_name: mysql
+
+  code:
+    image: registry.cn-hangzhou.aliyuncs.com/xwjs/code
+    volumes:
+      - /www/html:/usr/local/nginx/html
+    container_name: code
+
+
+
+
