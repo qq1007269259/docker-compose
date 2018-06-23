@@ -64,7 +64,8 @@ services:
     volumes:
       - $PWD/mysql/data:/var/lib/mysql/
     container_name: mysql
-
+ 
+  # 代码容器，将本地代码挂载至该容器中即可
   code:
     image: registry.cn-hangzhou.aliyuncs.com/xwjs/code
     volumes:
